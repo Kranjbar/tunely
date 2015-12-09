@@ -91,7 +91,15 @@ app.post('/api/albums/:albumId/songs', function songsCreate(req, res) {
 
 });
 
-
+app.delete('/api/albums/:id', function albumDelete(req, res){
+  console.log('deleted');
+  res.status(204).send();
+  var albumId = req.params.id;
+  db.Album.findOneAndRemove({ _id: albumId }, function (err, deletedAlbum) {
+    if (err) { console.log(err); }
+    res.json(deletedAlbum);
+  });
+});
 
 /**********
  * SERVER *
