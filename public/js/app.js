@@ -49,18 +49,62 @@ $(document).ready(function() {
     });
   });
 
+  // $('.save-changes').hide();
+
   $('#albums').on('click', '.edit-album', function(e) {
-    var id= $(this).parents('.album').data('album-id');
+    var id = $(this).parents('.album').data('album-id');
     console.log('id', id);
-    $(this).text('Save Changes');
-    var albumName = $('[data-album-id=' + id + ']').text();
+    $('[data-album-id=' + id + ']').find('.save-changes').toggle();
+    $('[data-album-id=' + id + ']').find('.edit-album').toggle();
+    var albumName = $('[data-album-id=' + id + ']').find('span.album-name').text();
+    var artistName = $('[data-album-id=' + id + ']').find('span.artist-name').text();
+    var releaseDate = $('[data-album-id=' + id + ']').find('span.album-releaseDate').text();
     $('[data-album-id=' + id + ']').find('span.album-name').html('<input class="edit-album-name" value="' + albumName + '"></input>');
+    $('[data-album-id=' + id + ']').find('span.artist-name').html('<input class="edit-artist-name" value="' + artistName + '"></input>');
+    $('[data-album-id=' + id + ']').find('span.album-releaseDate').html('<input class="edit-album-releaseDate" value="' + releaseDate + '"></input>');
   });
 
+  $('#albums').on('click', '.save-changes', function(e) {
+    var albumId = $(this).parents('.album').data('album-id');
+    var albumName = $('.edit-album-name').val();
+    var artistName = $('.edit-artist-name').val();
+    var releaseDate = $('.edit-album-releaseDate').val();
+    var formData = {
+      artistName: artistName,
+      name: albumName,
+      releaseDate: releaseDate
+    };
+
+    var putUrl = '/api/albums/' + albumId;
+
+    $.ajax({
+      method: 'PUT',
+      url: putUrl,
+      data: formData,
+      success: function(album) {
+        console.log(album);
+        $.get('/api/albums/' + albumId).success(function(album) {
+          $('[data-album-id='+ albumId + ']').remove();
+          renderAlbum(album);
+        });
+      },
+      error: function(error) {
+        console.log('Failure!');
+      }
+    });
+  });
+
+    // Open the modal
+    $('#albums').on('click', '.add-song', function(e) {
+    var id= $(this).parents('.album').data('album-id');
+    console.log('id',id);
+    $('#editSongModal').data('album-id', id);
+    $('#editSongModal').modal();
 });
 
 
 // handles the modal fields and POSTing the form to the server
+// doug is cool
 function handleNewSongSubmit(e) {
   var albumId = $('#songModal').data('album-id');
   var songName = $('#songName').val();
@@ -153,10 +197,11 @@ function renderAlbum(album) {
 
   "              <div class='panel-footer'>" +
   "                <button class='btn btn-primary add-song'>Add Song</button>" +
+  "                <button class='btn btn-info edit-song'>Edit Song</button>" +
   "                <button class='btn btn-primary delete-album'>Delete</button>" +
   "                <button class='btn btn-info edit-album'>Edit Album</button>" +
+  "                <button class='btn btn-info save-changes default-hidden'>Save Changes</button>" +
   "              </div>" +
-
   "            </div>" +
   "          </div>" +
   "          <!-- end one album -->";

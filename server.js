@@ -101,6 +101,22 @@ app.delete('/api/albums/:id', function albumDelete(req, res){
   });
 });
 
+app.put('/api/albums/:id', function albumUpdate(req, res){
+  console.log('updated');
+  var albumId = req.params.id;
+  db.Album.findOne({_id: albumId}, function (err, album) {
+    if (err) { console.log(err); }
+
+    album.artistName = req.body.artistName;
+    album.name = req.body.name;
+    album.releaseDate = req.body.releaseDate;
+
+    album.save(function (err, savedAlbum) {
+      res.json(savedAlbum);
+    });
+  });
+});
+
 /**********
  * SERVER *
  **********/
